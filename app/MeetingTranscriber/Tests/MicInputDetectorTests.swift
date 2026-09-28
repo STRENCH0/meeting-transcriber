@@ -221,4 +221,13 @@ final class MicInputDetectorTests: XCTestCase {
         detector.processProvider = { [snapshot("com.tencent.xinWeChat.MiniProgram")] }
         XCTAssertNil(detector.checkOnce())
     }
+
+    func testAppDisplayNameUsesInstalledAppNameAndFallsBackToBundleID() {
+        XCTAssertEqual(MicInputDetector.appDisplayName(bundleID: "com.apple.finder"), "Finder")
+        XCTAssertEqual(MicInputDetector.appDisplayName(bundleID: "com.example.not-installed"), "com.example.not-installed")
+    }
+
+    func testDefaultMainAppPIDProviderFindsNothingForAnAppThatIsNotRunning() {
+        XCTAssertNil(makeDetector().mainAppPIDProvider("com.example.not-installed"))
+    }
 }

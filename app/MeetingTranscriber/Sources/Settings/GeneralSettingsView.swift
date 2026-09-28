@@ -85,7 +85,7 @@ struct GeneralSettingsView: View {
     }
 
     @ViewBuilder private var customApps: some View {
-        ForEach(settings.watchCustomApps, id: \.self) { bundleID in
+        ForEach(Array(settings.watchCustomApps.enumerated()), id: \.element) { index, bundleID in
             HStack {
                 Image(nsImage: Self.appIcon(bundleID: bundleID))
                     .resizable()
@@ -95,6 +95,7 @@ struct GeneralSettingsView: View {
                 Button("Remove") {
                     settings.watchCustomApps.removeAll { $0 == bundleID }
                 }
+                .accessibilityIdentifier(A11yID.watchCustomAppRemove(index))
             }
         }
         VStack(alignment: .leading, spacing: 4) {
@@ -111,7 +112,11 @@ struct GeneralSettingsView: View {
         panel.allowsMultipleSelection = true
         panel.directoryURL = URL(fileURLWithPath: "/Applications")
         guard panel.runModal() == .OK else { return }
-        for bundleID in panel.urls.compactMap({ Bundle(url: $0)?.bundleIdentifier })
+        addWatchedApps(at: panel.urls)
+    }
+
+    func addWatchedApps(at urls: [URL]) {
+        for bundleID in urls.compactMap({ Bundle(url: $0)?.bundleIdentifier })
             where !settings.watchCustomApps.contains(bundleID) {
             settings.watchCustomApps.append(bundleID)
         }
